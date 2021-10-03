@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 class SpreadsheetParser():
     def __init__(self, grade):
-        self.book_name = "schedule1.xlsx"
+        self.book_name = "schedule.xlsx"
         self.weekdays = {
             "Понедельник" : 0,
             "Вторник" : 1,

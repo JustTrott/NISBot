@@ -1,8 +1,0 @@
-<table>
-<tbody>
-<tr><td>11Dрус</td><td>1 ГРУППА</td><td></td><td></td><td>ааааа</td><td></td><td>Английский 135 </td><td></td><td></td><td>ГППР 356, 354    </td><td></td><td>Математика 232      </td><td></td><td></td></tr>
-<tr><td>      </td><td>        </td><td></td><td></td><td>     </td><td></td><td>Абешова Гулнара</td><td></td><td></td><td>Джуматаева Раушан</td><td></td><td>Бектелеуова Акбота  </td><td></td><td></td></tr>
-<tr><td>      </td><td>2 ГРУППА</td><td></td><td></td><td>     </td><td></td><td>Английский 232 </td><td></td><td></td><td>ГППР 156         </td><td></td><td>Математика 225      </td><td></td><td></td></tr>
-<tr><td>      </td><td>        </td><td></td><td></td><td>     </td><td></td><td>Акимханова Алия</td><td></td><td></td><td>Абешова Гулнара  </td><td></td><td>Жампеисова Гулборчен</td><td></td><td></td></tr>
-</tbody>
-</table>
