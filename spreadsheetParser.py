@@ -113,5 +113,5 @@ class SpreadsheetParser():
 
 if __name__ == '__main__':
     sp = SpreadsheetParser("11E")
-    print(sp.sheet)
-    #sp.process_sheet('spreadsheets\\schedule1.xlsx')
+    #print(sp.sheet)
+    sp.process_sheet('schedule.xlsx')
