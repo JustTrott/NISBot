@@ -31,11 +31,13 @@ def handle(call):
         grades = [types.InlineKeyboardButton(parallel+grade, callback_data=parallel+grade) for grade in cfg.classes[parallel]]
         markup.add(*grades)
         bot.send_message(call.message.chat.id, f"Вы выбрали {parallel} параллель, выберите класс:", reply_markup=markup)
+        bot.delete_message(call.message.chat.id, message.message_id)
     elif call.message.text.endswith("выберите класс:"):
         grade = call.data
         sp = SpreadsheetParser(grade)
         msgtext = f"""`{sp.sheet}`"""
         bot.send_message(call.message.chat.id, msgtext, parse_mode='Markdown')
+        bot.delete_message(call.message.chat.id, message.message_id)
         #schedule_photo = ScheduleParser.get_schedule(grade)
         #bot.send_photo(call.message.chat.id, schedule_photo, f"Расписание {grade} класса:")
 
