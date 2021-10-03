@@ -52,7 +52,7 @@ class SpreadsheetParser():
         wb.save(filename)
 
     def parse_sheet(self, weekday, grade):
-        wb = load_workbook(filename='spreadsheets\\'+self.book_name, read_only=True)
+        wb = load_workbook(filename=self.book_name, read_only=True)
         ws = wb.active
         final_ans = ""
         for cell in ws[3]:
