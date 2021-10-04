@@ -13,8 +13,7 @@ class SpreadsheetParser():
             "Четверг" : 3,
             "Пятница" : 4
         }
-        self.weekday = datetime.today().weekday()+1
-        if datetime.today().hour >= 16:
+        if datetime.today().hour >= 10:
             self.weekday = datetime.today().weekday()+1
         else:
             self.weekday = datetime.today().weekday()
