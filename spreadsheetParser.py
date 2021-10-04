@@ -14,6 +14,10 @@ class SpreadsheetParser():
             "Пятница" : 4
         }
         self.weekday = datetime.today().weekday()+1
+        if datetime.today().hour >= 16:
+            self.weekday = datetime.today().weekday()+1
+        else:
+            self.weekday = datetime.today().weekday()
         if self.weekday in [5, 6, 7]:
             self.weekday = 0
         self.grade = grade
