@@ -4,7 +4,8 @@ from datetime import datetime
 from tabulate import tabulate
 
 class SpreadsheetParser():
-    def __init__(self, grade):
+    def __init__(self, grade, weekday):
+        self.grade = grade
         self.book_name = "schedule.xlsx"
         self.weekdays = {
             "Понедельник" : 0,
@@ -13,13 +14,15 @@ class SpreadsheetParser():
             "Четверг" : 3,
             "Пятница" : 4
         }
-        if datetime.today().hour >= 10:
-            self.weekday = datetime.today().weekday()+1
-        else:
-            self.weekday = datetime.today().weekday()
-        if self.weekday in [5, 6, 7]:
-            self.weekday = 0
-        self.grade = grade
+        try:
+            self.weekday = self.weekdays[weekday]
+        except KeyError:
+            if datetime.today().hour >= 10:
+                self.weekday = datetime.today().weekday()+1
+            else:
+                self.weekday = datetime.today().weekday()
+            if self.weekday in [5, 6, 7]:
+                self.weekday = 0
 
     def process_sheet(self, filename):
         wb = load_workbook(filename=filename, read_only=False)
@@ -48,13 +51,9 @@ class SpreadsheetParser():
                         ws[i][start_cell.column-1].value = large_text
                         ws.merge_cells(start_row=i, start_column=start_cell.column, end_row=i+3, end_column=last_cell.column)
                         i+=4
-                    #thestr = cell.value
-                    #ws.merge_cells(start_row=cell.row, start_column=cell.column, end_row=cell.row+3, end_column=cell.column+1)
-                    #ws.merge_cells(start_row=cell.row+4, start_column=cell.column, end_row=cell.row+7, end_column=cell.column+1)
-
         wb.save(filename)
 
-    def parse_sheet(self, weekday, grade):
+    def parse_sheet(self, grade, weekday):
         wb = load_workbook(filename=self.book_name, read_only=True)
         ws = wb.active
         final_ans = ""
@@ -103,7 +102,7 @@ class SpreadsheetParser():
                     copy_data_rows.append([names[1]])
                     continue
                 copy_data_rows.append([data_rows[j][i]])
-            final_ans += tabulate(copy_data_rows, headers='firstrow', tablefmt='grid') + '\n'
+            final_ans += tabulate(copy_data_rows, headers='firstrow', tablefmt='pretty') + '\n'
         #final_ans += tabulate(data_rows)
         final_ans += '\n'.join(std_bad_strings)
         final_ans += '\n'.join(bad_strings)
@@ -111,10 +110,10 @@ class SpreadsheetParser():
 
     @property
     def sheet(self):
-        return self.parse_sheet(self.weekday, self.grade)#self.weekday, self.grade)
+        return self.parse_sheet(self.grade, self.weekday)#self.weekday, self.grade)
 
 
 if __name__ == '__main__':
-    sp = SpreadsheetParser("11E")
-    #print(sp.sheet)
-    sp.process_sheet('schedule.xlsx')
+    sp = SpreadsheetParser("11E", "Вторник")
+    print(sp.sheet)
+    #sp.process_sheet('schedule.xlsx')
