@@ -76,7 +76,7 @@ class SpreadsheetParser():
                         std_bad_strings.append(f'\n{cell.value}')
                         data_cols.append("Стандарт")
                     else:
-                        bad_strings.append(f'\n\nПрофили{len(bad_strings)+1}: {cell.value}')
+                        bad_strings.append(f'\nПрофили{len(bad_strings)+1}: {cell.value}')
                         data_cols.append(f'Профили{len(bad_strings)}')
                     continue
                 data_cols.append(cell.value)
@@ -105,7 +105,7 @@ class SpreadsheetParser():
             final_ans += tabulate(copy_data_rows, headers='firstrow', tablefmt='pretty') + '\n'
         #final_ans += tabulate(data_rows)
         final_ans += '\n'.join(std_bad_strings)
-        final_ans += '\n'.join(bad_strings)
+        final_ans += '\n' + '\n'.join(bad_strings)
         return final_ans
 
     @property
