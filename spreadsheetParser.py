@@ -66,18 +66,18 @@ class SpreadsheetParser():
             if str(row[0].value).startswith(grade):
                 row_bounds = (row[0].row, row[0].row+3)
         data_rows = []
-        bad_strings = ['']
-        std_bad_strings = ['']
+        bad_strings = []
+        std_bad_strings = []
         for row in ws[col_bounds[0]+str(row_bounds[0]):col_bounds[1]+str(row_bounds[1])]:
             data_cols = []
             for cell in row:
                 if len(str(cell.value)) > 60:
                     if cell.value.startswith("Стандарт"):
-                        std_bad_strings.append(cell.value)
+                        std_bad_strings.append(f'\n{cell.value}')
                         data_cols.append("Стандарт")
                     else:
-                        bad_strings.append(f'Профили{len(bad_strings)}: {cell.value}')
-                        data_cols.append(f'Профили{len(bad_strings) - 1}')
+                        bad_strings.append(f'\n\nПрофили{len(bad_strings)+1}: {cell.value}')
+                        data_cols.append(f'Профили{len(bad_strings)}')
                     continue
                 data_cols.append(cell.value)
             data_rows.append(data_cols)
