@@ -27,7 +27,9 @@ def send_schedule(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle(call):
-    if call.data == 'abort' and call.message.reply_to_message.from_user.id == call.from_user.id:
+    if call.message.reply_to_message.from_user.id != call.from_user.id:
+        return
+    if call.data == 'abort':
             bot.delete_message(call.message.chat.id, call.message.message_id)
             try:
                 bot.delete_message(call.message.chat.id, call.message.reply_to_message.message_id)
