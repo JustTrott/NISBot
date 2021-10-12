@@ -27,6 +27,7 @@ def send_schedule(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle(call):
+    bot.answer_callback_query(call.id)
     if call.message.reply_to_message.from_user.id != call.from_user.id:
         return
     if call.data == 'abort':
@@ -65,7 +66,6 @@ def handle(call):
         bot.edit_message_text(msgtext, call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
         return
 
-    bot.answer_callback_query(call.id)
 
 def delayed_message_deletion(message):
     sleep(5)
