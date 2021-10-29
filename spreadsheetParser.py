@@ -23,7 +23,6 @@ class SpreadsheetParser():
                 self.weekday = datetime.today().weekday()
             if self.weekday in [5, 6, 7]:
                 self.weekday = 0
-
     def process_sheet(self, filename):
         wb = load_workbook(filename=filename, read_only=False)
         ws = wb.active

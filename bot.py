@@ -4,7 +4,6 @@ from telebot import types
 from config import Config
 from spreadsheetParser import SpreadsheetParser
 from time import sleep
-import threading
 
 cfg = Config()
 if cfg.bot_token == '':
@@ -14,6 +13,8 @@ weekdays = ["Понедельник", "Вторник", "Среда", "Четв�
 bot = telebot.TeleBot(cfg.bot_token)
 @bot.message_handler(commands=['schedule'])
 def send_schedule(message):
+    bot.reply_to(message, "на каникулах не работаю соре")
+    return
     spy_string = f"/schedule command was used by {message.from_user.first_name}"
     spy_string += f" {message.from_user.last_name}" if message.from_user.last_name is not None else ""
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
