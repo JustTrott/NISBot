@@ -36,9 +36,7 @@ def handle(call):
             try:
                 bot.delete_message(call.message.chat.id, call.message.reply_to_message.message_id)
             except telebot.apihelper.ApiTelegramException:
-                message = bot.reply_to(call.message.reply_to_message, "Недостаточно прав чтобы удалить это сообщение.\n`Это сообщение, будет удалено через 5 секунд`", parse_mode="Markdown")
-                t = threading.Thread(target=delayed_message_deletion(message))
-                t.start()
+                pass
             return
     if call.message.text == "Пожалуйста, выберите параллель:":
         markup = types.InlineKeyboardMarkup(row_width=3)
@@ -66,11 +64,6 @@ def handle(call):
         markup.add(types.InlineKeyboardButton("Закрыть", callback_data='abort'))
         bot.edit_message_text(msgtext, call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
         return
-
-
-def delayed_message_deletion(message):
-    sleep(5)
-    bot.delete_message(message.chat.id, message.message_id)
 
 if __name__ == '__main__':
     print("Starting application...")
