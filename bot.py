@@ -11,10 +11,18 @@ if cfg.bot_token == '':
     sys.exit()
 weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
 bot = telebot.TeleBot(cfg.bot_token)
+
+@bot.message_handler(commands=['m'])
+def send_msg(message):
+    if message.from_user.id != 526419716:
+        return
+    chat_id = -1001252807888
+    text = message.text[2:]#"@lulakebaber не кикай пж"
+    bot.send_message(chat_id, text)
+
+
 @bot.message_handler(commands=['schedule'])
 def send_schedule(message):
-    bot.reply_to(message, "на каникулах не работаю соре")
-    return
     spy_string = f"/schedule command was used by {message.from_user.first_name}"
     spy_string += f" {message.from_user.last_name}" if message.from_user.last_name is not None else ""
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
