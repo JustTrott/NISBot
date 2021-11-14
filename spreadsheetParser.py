@@ -7,112 +7,118 @@ class SpreadsheetParser():
     def __init__(self, grade, weekday):
         self.grade = grade
         self.book_name = "schedule.xlsx"
-        self.weekdays = {
-            "Понедельник" : 0,
-            "Вторник" : 1,
-            "Среда" : 2,
-            "Четверг" : 3,
-            "Пятница" : 4
-        }
-        try:
-            self.weekday = self.weekdays[weekday]
-        except KeyError:
-            if datetime.today().hour >= 10:
-                self.weekday = datetime.today().weekday()+1
-            else:
-                self.weekday = datetime.today().weekday()
-            if self.weekday in [5, 6, 7]:
-                self.weekday = 0
+        self.weekday = weekday
     def process_sheet(self, filename):
         wb = load_workbook(filename=filename, read_only=False)
         ws = wb.active
         for row in ws['A134':'BJ182']:
             for cell in row:
-                if len(str(cell.value)) > 60:
-                    large_text = str(cell.value)
-                    i = cell.row + 1
-                    mergecell = type(ws[cell.row+1][cell.column-1])
-                    while type(ws[i + 1][cell.column-1]) == mergecell:
-                        i += 1
-                    if type(ws[i][cell.column]) == mergecell:
-                        last_cell = ws[i][cell.column]
-                    else:
-
-                        last_cell = ws[i][cell.column-1]
-                    start_cell = cell
-                    try:
-                        ws.unmerge_cells(start_row=start_cell.row, start_column=start_cell.column, end_row=last_cell.row, end_column=last_cell.column)
-                    except ValueError:
-                        last_cell = ws[i][cell.column-1]
-                        ws.unmerge_cells(start_row=start_cell.row, start_column=start_cell.column, end_row=last_cell.row, end_column=last_cell.column)
-                    i = start_cell.row
-                    while i <= last_cell.row:
-                        ws[i][start_cell.column-1].value = large_text
-                        ws.merge_cells(start_row=i, start_column=start_cell.column, end_row=i+3, end_column=last_cell.column)
-                        i+=4
+                if len(str(cell.value)) < 60:
+                    continue
+                target_content = str(cell.value)
+                i = cell.row + 1
+                j = cell.column - 1
+                mergecell = type(ws[i][j])
+                while type(ws[i + 1][j]) == mergecell:
+                    i += 1
+                if type(ws[i][cell.column]) == mergecell:
+                    last_cell = ws[i][j + 1]
+                else:
+                    last_cell = ws[i][j]
+                start_cell = cell
+                try:
+                    ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
+                except ValueError:
+                    last_cell = ws[i][j]
+                    ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
+                i = start_cell.row
+                while i <= last_cell.row:
+                    ws[i][j].value = target_content
+                    ws.merge_cells(start_row=i, start_column=start_cell.column, end_row=i+3, end_column=last_cell.column)
+                    i+=4
+        for row in ws['C6':'BJ182']:
+            for i in range(len(row) - 1):
+                if type(row[i+1]) != mergecell:
+                    continue
+                try:
+                    ws.unmerge_cells(f"{row[i].coordinate}:{row[i+1].coordinate}")
+                    ws[row[i+1].coordinate].value = row[i].value
+                except (ValueError, IndexError):
+                    continue
         wb.save(filename)
 
     def parse_sheet(self, grade, weekday):
         wb = load_workbook(filename=self.book_name, read_only=True)
         ws = wb.active
-        final_ans = ""
-        for cell in ws[3]:
-            if cell.value is not None and self.weekdays[str(cell.value)] == weekday:
-                final_ans += f"Расписание для класса {grade} на день: {str(cell.value)}\n"
-                col_bounds = cell.column_letter, ws[3][cell.column + 10].column_letter
+        weekdays_row = ws[3]
+        for cell in weekdays_row:
+            if cell.value is not None and str(cell.value) == weekday:
+                schedule = f"Расписание для класса {grade} на день: {str(cell.value)}\n"
+                col_bounds = cell.column_letter, weekdays_row[cell.column + 10].column_letter
                 break
         for row in ws:
             if str(row[0].value).startswith(grade):
                 row_bounds = (row[0].row, row[0].row+3)
-        data_rows = []
-        bad_strings = []
-        std_bad_strings = []
-        for row in ws[col_bounds[0]+str(row_bounds[0]):col_bounds[1]+str(row_bounds[1])]:
+        schedule_items = []
+        profile_subjects = []
+        standard_subjects = []
+        for row in ws[f"{col_bounds[0]}{row_bounds[0]}" : f"{col_bounds[1]}{row_bounds[1]}"]:
             data_cols = []
             for cell in row:
                 if len(str(cell.value)) > 60:
                     if cell.value.startswith("Стандарт"):
-                        std_bad_strings.append(f'\n{cell.value}')
+                        standard_subjects.append(f'\n{cell.value}')
                         data_cols.append("Стандарт")
                     else:
-                        bad_strings.append(f'\nПрофили{len(bad_strings)+1}: {cell.value}')
-                        data_cols.append(f'Профили{len(bad_strings)}')
+                        profile_subjects.append(f'\nПрофили {len(profile_subjects)+1}: {cell.value}')
+                        data_cols.append(f'Профили {len(profile_subjects)}')
                     continue
                 data_cols.append(cell.value)
-            data_rows.append(data_cols)
+            schedule_items.append(data_cols)
+
+        times_row = ws[f"{col_bounds[0]}4" : f"{col_bounds[1]}4"][0]
+        times = []
+        for cell in times_row:
+            times.append(cell.value)
+        schedule_items.insert(0, times)
+        for i in reversed(range(len(schedule_items[1]) - 1)):
+            if schedule_items[1][i] == schedule_items[1][i+1]:
+                time = schedule_items[0][i]
+                time = time[:time.find('-')] + schedule_items[0][i+1][schedule_items[0][i+1].find('-'):]
+                schedule_items[0][i] = "p" + time
+                for j in range(len(schedule_items)):
+                    del schedule_items[j][i+1]
+
+
         for i in reversed(range(len(data_cols))):
-            isRowEmpty = 0
-            for j in range(len(data_rows)):
-                if data_rows[j][i] is not None:
-                    isRowEmpty = 1
-            if isRowEmpty == 0:
-                for j in range(len(data_rows)):
-                    del data_rows[j][i]
-        arr_cnt = len(data_rows[0])
-        for i in range(arr_cnt):
-            copy_data_rows = []
-            copy_data_rows.append([f'{i+1} Урок'])
-            for j in range(len(data_rows)):
-                if data_rows[j][i] is None:
+            for j in range(1, len(schedule_items)):
+                if schedule_items[j][i] is not None:
+                    break
+            else:
+                for j in range(len(schedule_items)):
+                    del schedule_items[j][i]
+        subjects_cnt = len(schedule_items[0])
+        for i in range(subjects_cnt):
+            copy_schedule_items = []
+            for j in range(len(schedule_items)):
+                if schedule_items[j][i] is None:
                     continue
-                if len(data_rows[j][i]) > 30:
-                    names = data_rows[j][i].split(',')
-                    copy_data_rows.append([names[0]])
-                    copy_data_rows.append([names[1]])
-                    continue
-                copy_data_rows.append([data_rows[j][i]])
-            final_ans += tabulate(copy_data_rows, headers='firstrow', tablefmt='pretty') + '\n'
-        #final_ans += tabulate(data_rows)
-        final_ans += '\n'.join(std_bad_strings)
-        final_ans += '\n' + '\n'.join(bad_strings)
-        return final_ans
+                copy_schedule_items.append([schedule_items[j][i]])
+            if copy_schedule_items[0][0].startswith('p'):
+                copy_schedule_items[0][0] = f'{i+1} Пара ' + copy_schedule_items[0][0][1:]
+            else:
+                copy_schedule_items[0][0] = f'{i+1} Урок ' + copy_schedule_items[0][0]
+            schedule += tabulate(copy_schedule_items, headers='firstrow', tablefmt='pretty') + '\n'
+        schedule += '\n'.join(standard_subjects)
+        schedule += '\n' + '\n'.join(profile_subjects)
+        return schedule
 
     @property
     def sheet(self):
-        return self.parse_sheet(self.grade, self.weekday)#self.weekday, self.grade)
+        return self.parse_sheet(self.grade, self.weekday)
 
 
 if __name__ == '__main__':
-    sp = SpreadsheetParser("11E", "Вторник")
-    #print(sp.sheet)
-    sp.process_sheet('schedule.xlsx')
+    sp = SpreadsheetParser("11D", "Среда")
+    print(sp.sheet)
+    #sp.process_sheet('schedule.xlsx')

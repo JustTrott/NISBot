@@ -58,7 +58,6 @@ def handle(call):
     if call.message.text.endswith("выберите класс:"):
         grade = call.data
         markup = types.InlineKeyboardMarkup(row_width=3)
-        markup.add(types.InlineKeyboardButton("Выбрать автоматически", callback_data=f"{grade} auto"))
         markup.add(*[types.InlineKeyboardButton(weekday, callback_data=f"{grade} {weekday}") for weekday in weekdays])
         markup.add(types.InlineKeyboardButton("Отмена", callback_data='abort'))
         bot.edit_message_text(f"Вы выбрали {grade} класс, выберите день недели:", call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
