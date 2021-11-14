@@ -31,11 +31,11 @@ class SpreadsheetParser():
                 except ValueError:
                     last_cell = ws[i][j]
                     ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
-                i = start_cell.row
-                while i <= last_cell.row:
-                    ws[i][j].value = target_content
-                    ws.merge_cells(start_row=i, start_column=start_cell.column, end_row=i+3, end_column=last_cell.column)
-                    i+=4
+                for k in range(start_cell.row, last_cell.row + 1, 4):
+                    for l in range(start_cell.column-1, last_cell.column):
+                        print(ws[k][l].coordinate)
+                        ws[k][l].value = target_content
+                        ws.merge_cells(f"{ws[k][l].coordinate}:{ws[k+3][l].coordinate}")
         for row in ws['C6':'BJ182']:
             for i in range(len(row) - 1):
                 if type(row[i+1]) != mergecell:
@@ -61,16 +61,15 @@ class SpreadsheetParser():
                 row_bounds = (row[0].row, row[0].row+3)
         schedule_items = []
         profile_subjects = []
-        standard_subjects = []
         for row in ws[f"{col_bounds[0]}{row_bounds[0]}" : f"{col_bounds[1]}{row_bounds[1]}"]:
             data_cols = []
             for cell in row:
                 if len(str(cell.value)) > 60:
-                    if cell.value.startswith("Стандарт"):
-                        standard_subjects.append(f'\n{cell.value}')
-                        data_cols.append("Стандарт")
-                    else:
+                    target = f'\nПрофили {len(profile_subjects)}: {cell.value}'
+                    if target not in profile_subjects:
                         profile_subjects.append(f'\nПрофили {len(profile_subjects)+1}: {cell.value}')
+                        data_cols.append(f'Профили {len(profile_subjects)}')
+                    else:
                         data_cols.append(f'Профили {len(profile_subjects)}')
                     continue
                 data_cols.append(cell.value)
@@ -88,8 +87,6 @@ class SpreadsheetParser():
                 schedule_items[0][i] = "p" + time
                 for j in range(len(schedule_items)):
                     del schedule_items[j][i+1]
-
-
         for i in reversed(range(len(data_cols))):
             for j in range(1, len(schedule_items)):
                 if schedule_items[j][i] is not None:
@@ -109,7 +106,6 @@ class SpreadsheetParser():
             else:
                 copy_schedule_items[0][0] = f'{i+1} Урок ' + copy_schedule_items[0][0]
             schedule += tabulate(copy_schedule_items, headers='firstrow', tablefmt='pretty') + '\n'
-        schedule += '\n'.join(standard_subjects)
         schedule += '\n' + '\n'.join(profile_subjects)
         return schedule
 
@@ -119,6 +115,6 @@ class SpreadsheetParser():
 
 
 if __name__ == '__main__':
-    sp = SpreadsheetParser("11D", "Среда")
+    sp = SpreadsheetParser("11D", "Пятница")
     print(sp.sheet)
     #sp.process_sheet('schedule.xlsx')
