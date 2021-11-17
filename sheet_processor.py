@@ -29,7 +29,6 @@ class SpreadsheetProcessor():
                     ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
                 for k in range(start_cell.row, last_cell.row + 1, 4):
                     for l in range(start_cell.column-1, last_cell.column):
-                        print(ws[k][l].coordinate)
                         ws[k][l].value = target_content
                         ws.merge_cells(f"{ws[k][l].coordinate}:{ws[k+3][l].coordinate}")
         for row in ws['C6':'BJ182']:
