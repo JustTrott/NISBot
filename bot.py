@@ -2,7 +2,7 @@ import sys
 import telebot
 from telebot import types
 from config import Config
-from spreadsheetParser import SpreadsheetParser
+from sheet_parser import SpreadsheetParser
 from time import sleep
 
 cfg = Config()
@@ -10,6 +10,7 @@ if cfg.bot_token == '':
     print("Bot token is not found in config.ini")
     sys.exit()
 weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
+sp = SpreadsheetParser('schedule.xlsx')
 bot = telebot.TeleBot(cfg.bot_token)
 
 @bot.message_handler(commands=['m'])
@@ -65,8 +66,8 @@ def handle(call):
     if call.message.text.endswith("выберите день недели:"):
         print(f"{call.data = } by {call.from_user.first_name}")
         grade, weekday = call.data.split()
-        sp = SpreadsheetParser(grade, weekday)
-        msgtext = f"""`{sp.sheet}`"""
+        sheet = sp.get_grade_schedule(grade, weekday)
+        msgtext = f"""`{sheet}`"""
         markup = types.InlineKeyboardMarkup(row_width=3)
         markup.add(types.InlineKeyboardButton("Закрыть", callback_data='abort'))
         bot.edit_message_text(msgtext, call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
