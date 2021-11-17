@@ -7,6 +7,8 @@ class SpreadsheetParser():
         self.book_name = filename
 
     def get_grade_schedule(self, grade, weekday):
+        if weekday == 'auto':
+            weekday = self.get_current_weekday()
         wb = load_workbook(filename=self.book_name, read_only=True)
         ws = wb.active
         weekdays_row = ws[3]
@@ -68,7 +70,21 @@ class SpreadsheetParser():
         schedule += '\n' + '\n'.join(profile_subjects)
         return schedule
 
+    def get_current_weekday(self):
+        weekdays = {
+            0: "Понедельник",
+            1: "Вторник",
+            2: "Среда",
+            3: "Четверг",
+            4: "Пятница"
+        }
+        if datetime.utcnow().hour >= 10:
+            day = datetime.utcnow().weekday()
+        if day > 4:
+            day = 0
+        return weekdays[day]
+
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule("11D", "Пятница"))
+    print(sp.get_grade_schedule("11D", "auto"))

@@ -74,6 +74,7 @@ def handle(call):
     if call_type == '2':
         parallel, letter = call_data.split()
         markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(types.InlineKeyboardButton("Выбрать автоматически", callback_data='3 ' + f"{parallel} {letter} auto"))
         markup.add(*[types.InlineKeyboardButton(weekday, callback_data='3 ' + f"{parallel} {letter} {weekday}") for weekday in weekdays])
         navigation_buttons = []
         navigation_buttons.append(types.InlineKeyboardButton("⬅️", callback_data='1 ' + parallel))
