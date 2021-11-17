@@ -1,5 +1,4 @@
 from openpyxl import load_workbook
-from openpyxl import utils
 from datetime import datetime
 from tabulate import tabulate
 
