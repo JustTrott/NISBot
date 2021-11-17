@@ -79,6 +79,8 @@ class SpreadsheetParser():
             4: "Пятница"
         }
         if datetime.utcnow().hour >= 10:
+            day = datetime.utcnow().weekday() + 1
+        else:
             day = datetime.utcnow().weekday()
         if day > 4:
             day = 0
