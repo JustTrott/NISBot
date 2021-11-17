@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: execute py script # run spreadsheetparser.py to get the latest data
-        run: python spreadsheetparser.py
+        run: python spreadsheetParser.py
           
       - name: commit files
         run: |
