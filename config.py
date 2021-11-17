@@ -28,6 +28,10 @@ class Config():
         for i in range(7, 13):
             class_dict[str(i)] = [char for char in self.cp['classes'][str(i)]]
         return class_dict
+    @property
+    def admin_id(self):
+        return int(self.cp['admin']['admin_id'])
+
 
 
 if __name__ == '__main__':
