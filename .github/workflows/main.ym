@@ -23,9 +23,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      name: checkout repo content
-        uses: actions/checkout@v2 # checkout the repository content to github runner
-
       - name: setup python
         uses: actions/setup-python@v2
         with:
