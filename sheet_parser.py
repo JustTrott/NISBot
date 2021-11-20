@@ -1,6 +1,9 @@
 from openpyxl import load_workbook
 from datetime import datetime
 from tabulate import tabulate
+from PIL import Image, ImageDraw, ImageFont
+
+
 
 class SpreadsheetParser():
     def __init__(self, filename):
@@ -55,6 +58,15 @@ class SpreadsheetParser():
             else:
                 for j in range(len(schedule_items)):
                     del schedule_items[j][i]
+        for i in range(len(schedule_items[0])):
+            if schedule_items[0][i].startswith('p'):
+                schedule_items[0][i] = f"{i+1} Пара {schedule_items[0][i][1:]}"
+            else:
+                schedule_items[i][0] = f"{i+1} Урок {schedule_items[0][i]}"
+        #schedule_items[0].insert(0, weekday)
+        #for i in range(1, len(schedule_items)):
+            schedule_items[i].insert(0, None)
+        return tabulate(schedule_items, headers='firstrow', tablefmt='fancy_grid')
         subjects_cnt = len(schedule_items[0])
         for i in range(subjects_cnt):
             copy_schedule_items = []
@@ -67,6 +79,7 @@ class SpreadsheetParser():
             else:
                 copy_schedule_items[0][0] = f'{i+1} Урок ' + copy_schedule_items[0][0]
             schedule += tabulate(copy_schedule_items, headers='firstrow', tablefmt='pretty') + '\n'
+        
         schedule += '\n' + '\n'.join(profile_subjects)
         return schedule
 
@@ -85,8 +98,29 @@ class SpreadsheetParser():
         if day > 4:
             day = 0
         return weekdays[day]
+    
+    def create_image(self, text):
+        img = Image.new('RGB', (1300, 1000), color = (255, 255, 255))
+        d = ImageDraw.Draw(img)
+
+        lines = text.split('\n')
+        print(lines[0])
+        unicode_font = ImageFont.truetype("SourceCodePro-Regular.ttf", 15)
+        cnt = 10
+        for line in lines:
+            d.text((10, cnt), line, font=unicode_font, fill=(0, 0, 0))
+            cnt += 15
+
+        img.save('test.png')
+        
+    def get_all_schedules(self, grade):
+        weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
+        text = ""
+        for weekday in weekdays:
+            text += self.get_grade_schedule(grade, weekday) + "\n"
+        self.create_image(text)
 
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule("11D", "auto"))
+    sp.get_all_schedules("11D")
