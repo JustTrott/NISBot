@@ -1,4 +1,5 @@
 from openpyxl import load_workbook
+from openpyxl.utils.cell import range_boundaries
 
 class SpreadsheetProcessor():
     def __init__(self, filename):
@@ -7,39 +8,16 @@ class SpreadsheetProcessor():
     def process_sheet(self):
         wb = load_workbook(filename=self.book_name, read_only=False)
         ws = wb.active
-        for row in ws['A134':'BJ182']:
-            for cell in row:
-                if len(str(cell.value)) < 60:
-                    continue
-                target_content = str(cell.value)
-                i = cell.row + 1
-                j = cell.column - 1
-                mergecell = type(ws[i][j])
-                while type(ws[i + 1][j]) == mergecell:
-                    i += 1
-                if type(ws[i][cell.column]) == mergecell:
-                    last_cell = ws[i][j + 1]
-                else:
-                    last_cell = ws[i][j]
-                start_cell = cell
-                try:
-                    ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
-                except ValueError:
-                    last_cell = ws[i][j]
-                    ws.unmerge_cells(f"{start_cell.coordinate}:{last_cell.coordinate}")
-                for k in range(start_cell.row, last_cell.row + 1, 4):
-                    for l in range(start_cell.column-1, last_cell.column):
-                        ws[k][l].value = target_content
-                        ws.merge_cells(f"{ws[k][l].coordinate}:{ws[k+3][l].coordinate}")
-        for row in ws['C6':'BJ182']:
-            for i in range(len(row) - 1):
-                if type(row[i+1]) != mergecell:
-                    continue
-                try:
-                    ws.unmerge_cells(f"{row[i].coordinate}:{row[i+1].coordinate}")
-                    ws[row[i+1].coordinate].value = row[i].value
-                except (ValueError, IndexError):
-                    continue
+        mcr_coord_list = [mcr.coord for mcr in ws.merged_cells.ranges]
+        for mcr in mcr_coord_list:
+            min_col, min_row, max_col, max_row = range_boundaries(mcr)
+            if min_col < 3 or min_row < 6:
+                continue
+            top_left_cell_value = ws.cell(row=min_row, column=min_col).value
+            ws.unmerge_cells(mcr)
+            for row in ws.iter_rows(min_col=min_col, min_row=min_row, max_col=max_col, max_row=max_row):
+                for cell in row:
+                    cell.value = top_left_cell_value
         wb.save(self.book_name)
 
 if __name__ == '__main__':
