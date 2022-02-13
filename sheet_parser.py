@@ -15,7 +15,7 @@ class SpreadsheetParser():
         for cell in weekdays_row:
             if cell.value is not None and str(cell.value) == weekday:
                 schedule = f"Расписание для класса {grade} на день: {str(cell.value)}\n"
-                col_bounds = cell.column_letter, weekdays_row[cell.column + 14].column_letter
+                col_bounds = cell.column_letter, weekdays_row[cell.column + 10].column_letter
                 break
         for row in ws:
             if str(row[0].value).startswith(grade):
@@ -89,4 +89,4 @@ class SpreadsheetParser():
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule("11D", "Вторник"))
+    print(sp.get_grade_schedule("11D", "auto"))
