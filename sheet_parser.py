@@ -67,7 +67,7 @@ class SpreadsheetParser():
             else:
                 copy_schedule_items[0][0] = f'{i+1} Урок ' + copy_schedule_items[0][0]
             schedule += tabulate(copy_schedule_items, headers='firstrow', tablefmt='pretty') + '\n'
-        schedule += '\n' + '\n'.join([f'Профили{index+1}: {subject}' for index, subject in enumerate(profile_subjects)])
+        schedule += '\n' + '\n\n'.join([f'Профили{index+1}: {subject}' for index, subject in enumerate(profile_subjects)])
         return schedule
 
     def get_current_weekday(self):
@@ -89,4 +89,4 @@ class SpreadsheetParser():
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule("8D", "auto"))
+    print(sp.get_grade_schedule("11F", "Вторник"))
