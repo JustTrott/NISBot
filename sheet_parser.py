@@ -26,12 +26,12 @@ class SpreadsheetParser():
             data_cols = []
             for cell in row:
                 if len(str(cell.value)) > 60:
-                    target = f'\nПрофили {len(profile_subjects)}: {cell.value}'
+                    target = f'{cell.value}'
                     if target not in profile_subjects:
-                        profile_subjects.append(f'\nПрофили {len(profile_subjects)+1}: {cell.value}')
-                        data_cols.append(f'Профили {len(profile_subjects)}')
+                        profile_subjects.append(target)
+                        data_cols.append(f'Профили{len(profile_subjects)}')
                     else:
-                        data_cols.append(f'Профили {len(profile_subjects)}')
+                        data_cols.append(f'Профили{profile_subjects.index(target) + 1}')
                     continue
                 data_cols.append(cell.value)
             schedule_items.append(data_cols)
@@ -67,7 +67,7 @@ class SpreadsheetParser():
             else:
                 copy_schedule_items[0][0] = f'{i+1} Урок ' + copy_schedule_items[0][0]
             schedule += tabulate(copy_schedule_items, headers='firstrow', tablefmt='pretty') + '\n'
-        schedule += '\n' + '\n'.join(profile_subjects)
+        schedule += '\n' + '\n'.join([f'Профили{index+1}: {subject}' for index, subject in enumerate(profile_subjects)])
         return schedule
 
     def get_current_weekday(self):
@@ -89,4 +89,4 @@ class SpreadsheetParser():
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule("11D", "auto"))
+    print(sp.get_grade_schedule("8D", "auto"))
