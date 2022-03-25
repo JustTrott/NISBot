@@ -3,7 +3,7 @@ from openpyxl.utils.cell import range_boundaries
 from config import Config
 
 class SpreadsheetProcessor():
-    def __init__(self, filename : str):
+    def __init__(self, filename : str) -> None:
         self.book_name = filename
 
     def get_grade_letters(self) -> dict[str, str]:
@@ -18,7 +18,7 @@ class SpreadsheetProcessor():
             grades[parallel] = grades[parallel] + letter if parallel in grades else letter
         return grades
 
-    def unmerge_and_fill_sheet(self):
+    def unmerge_and_fill_sheet(self) -> None:
         wb = load_workbook(filename=self.book_name, read_only=False)
         ws = wb.active
         mcr_coord_list = [mcr.coord for mcr in ws.merged_cells.ranges]

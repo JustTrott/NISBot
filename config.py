@@ -2,7 +2,7 @@ import os
 import configparser as cp
 
 class Config():
-    def __init__(self, file_name='config.ini'):
+    def __init__(self, file_name='config.ini') -> None:
         self.cp = cp.ConfigParser()
         self.file_name = file_name
         self.config(file_name)
@@ -28,7 +28,7 @@ class Config():
         return _classes
 
     @classes.setter
-    def classes(self, value : dict[str, str]):
+    def classes(self, value : dict[str, str]) -> None:
         self.cp['classes'] = value
         with open(self.file_name, 'w') as file:
             self.cp.write(file)
