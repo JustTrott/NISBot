@@ -1,3 +1,4 @@
+from calendar import weekday
 from filters import abort_factory, home_page_factory, parallel_page_factory, grade_page_factory, schedule_page_factory
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -48,6 +49,14 @@ def generate_parallel_keyboard(parallel: str, letters: list[str]) -> None:
 def generate_grade_keyboard(parallel: str, letter: str) -> None:
     weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
     keyboard = InlineKeyboardMarkup(row_width=3)
+    keyboard.add(
+        InlineKeyboardButton(
+            text='Выбрать автоматически',
+            parallel=parallel,
+            letter=letter,
+            weekday='auto'
+        )
+    )
     keyboard.add(*[
         InlineKeyboardButton(
             text=weekday,
