@@ -1,4 +1,5 @@
 import sys
+from uuid import uuid4
 
 import telebot
 from telebot import types
@@ -80,6 +81,39 @@ def send_schedule_page(call: types.CallbackQuery):
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id, parse_mode='Markdown',
         reply_markup=generate_schedule_keyboard(parallel=parallel, letter=letter))
     bot.answer_callback_query(call.id)
+
+
+def is_query_a_grade(query: str) -> bool:
+    query = query.strip()
+    if query == '':
+        return False
+    grades = cfg.classes
+    for parallel in grades:
+        for letter in grades[parallel]:
+            if query.upper() in str(parallel + letter) or str(parallel + letter) in query.upper():
+                return True
+    return False
+
+
+@bot.inline_handler(lambda query: is_query_a_grade(query.query))
+def show_grades(inline_query: types.InlineQuery):
+    grades = cfg.classes
+    possible_grades = []
+    for parallel in grades:
+        for letter in grades[parallel]:
+            grade = parallel + letter
+            if inline_query.query.upper() in grade or grade in inline_query.query.upper():
+                possible_grades.append(grade)
+    responses = [
+        types.InlineQueryResultArticle(
+            id=str(uuid4()),
+            title=possible_grades[i],
+            input_message_content=types.InputTextMessageContent(f"""`{sheet}`""", parse_mode='Markdown'),
+            description=sp.get_current_weekday()
+        )
+        for i, sheet in enumerate(sp.get_grade_schedule_bulk(possible_grades, 'auto'))
+    ]
+    bot.answer_inline_query(inline_query.id, responses, cache_time=5)
 
 
 if __name__ == '__main__':
