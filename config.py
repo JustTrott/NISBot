@@ -6,7 +6,6 @@ class Config():
     def __init__(self, file_name='config.ini') -> None:
         self.cp = cp.ConfigParser()
         self.file_name = file_name
-        self.config(file_name)
         if os.path.isfile(file_name):
             self.cp.read(file_name)
         else:
