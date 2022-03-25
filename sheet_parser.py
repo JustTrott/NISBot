@@ -1,5 +1,6 @@
-from openpyxl import load_workbook
 from datetime import datetime
+
+from openpyxl import load_workbook
 from tabulate import tabulate
 
 class SpreadsheetParser():

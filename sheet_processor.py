@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.utils.cell import range_boundaries
+
 from config import Config
 
 class SpreadsheetProcessor():
