@@ -26,6 +26,14 @@ def send_msg(message : types.Message):
     bot.send_message(chat_id, text)
 
 
+@bot.message_handler(commands=['start'])
+def send_welcome(message: types.Message):
+    welcome_message = "Этот бот позволяет вам **быстро** получить школьное расписание НИШ ФМН в городе Нур-Султан, включая информацию о **кабинетах** и **времени** проведения уроков."
+    welcome_message += "\nПросто напишите /schedule и следуйте инструкциям! <- Команда также работает и в **группах**"
+    welcome_message += "\nТакже можно вызвать бота не добавляя его, в любом чате, написав @TrottTheBot"
+    welcome_message += "\nСпасибо, что пользуетесь ботом. Автор: @TrottTheDev"
+
+
 @bot.message_handler(commands=['schedule'])
 def send_schedule(message : types.Message):
     spy_string = f"/schedule command was used by {message.from_user.first_name}"
