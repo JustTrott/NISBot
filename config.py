@@ -20,24 +20,26 @@ class Config():
             with open(file_name, 'w') as file:
                 self.cp.write(file)
 
-    def set_grades(self, grades : dict):
-        self.cp['classes'] = grades
-        with open(self.file_name, 'w') as file:
-            self.cp.write(file)
-
     @property
     def bot_token(self):
         return self.cp['connection']['bot_token']
+
     @property
     def classes(self):
         class_dict = {}
         for i in range(7, 13):
             class_dict[str(i)] = [char for char in self.cp['classes'][str(i)]]
         return class_dict
+
+    @classes.setter
+    def classes(self, value : dict):
+        self.cp['classes'] = value
+        with open(self.file_name, 'w') as file:
+            self.cp.write(file)
+
     @property
     def admin_id(self):
         return int(self.cp['admin']['admin_id'])
-
 
 
 if __name__ == '__main__':
