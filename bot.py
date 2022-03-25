@@ -1,8 +1,12 @@
 import sys
+
 import telebot
 from telebot import types
+
 from config import Config
 from sheet_parser import SpreadsheetParser
+from filters import abort_factory, home_page_factory, parallel_page_factory, grade_page_factory, schedule_page_factory, bind_filters
+from keyboards import generate_home_keyboard, generate_parallel_keyboard, generate_grade_keyboard, generate_schedule_keyboard
 
 cfg = Config()
 if cfg.bot_token == '':
@@ -10,11 +14,11 @@ if cfg.bot_token == '':
     sys.exit()
 sp = SpreadsheetParser('schedule.xlsx')
 bot = telebot.TeleBot(cfg.bot_token)
-admin_id = cfg.admin_id
+
 
 @bot.message_handler(commands=['m'])
 def send_msg(message : types.Message):
-    if message.from_user.id != admin_id:
+    if message.from_user.id != cfg.admin_id:
         return
     chat_id = -1001252807888
     text = message.text[2:]
@@ -28,73 +32,57 @@ def send_schedule(message : types.Message):
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
     spy_string += f" in chat {message.chat.title}" if message.chat.title is not None else ""
     print(spy_string)
-    markup = types.InlineKeyboardMarkup(row_width=3)
-    parallels = [types.InlineKeyboardButton(grade, callback_data="1 " + grade) for grade in cfg.classes]
-    markup.add(*parallels)
-    markup.add(types.InlineKeyboardButton("🗑", callback_data='abort'))
-    bot.send_message(message.chat.id, "Пожалуйста, выберите параллель:", reply_markup=markup, reply_to_message_id=message.message_id)
+    bot.send_message(message.chat.id, "Пожалуйста, выберите параллель:", reply_markup=generate_home_keyboard(list(cfg.classes.keys())), reply_to_message_id=message.message_id)
 
-@bot.callback_query_handler(func=lambda call: True)
-def handle(call : types.CallbackQuery):
+
+@bot.callback_query_handler(func=None, abort_config=abort_factory.filter())
+def abort(call : types.CallbackQuery):
+    bot.answer_callback_query(call.id, "Запрос был удалён.")
+    bot.delete_message(call.message.chat.id, call.message.id)
+    try:
+        bot.delete_message(call.message.chat.id, call.message.reply_to_message.message_id)
+    except telebot.apihelper.ApiTelegramException:
+        pass
+
+
+@bot.callback_query_handler(func=None, home_page_config=home_page_factory.filter())
+def send_home_page(call: types.CallbackQuery):
+    bot.edit_message_text("Пожалуйста, выберите параллель:", call.message.chat.id, call.message.message_id, 
+        reply_markup=generate_home_keyboard(list(cfg.classes.keys())))
+    bot.answer_callback_query(call.id, "Вы были возвращены на страницу выбора параллелей.")
+
+
+@bot.callback_query_handler(func=None, parallel_page_config=parallel_page_factory.filter())
+def send_parallel_page(call: types.CallbackQuery):
+    callback_data: dict[str, str] = parallel_page_factory.parse(callback_data=call.data)
+    parallel = callback_data['parallel']
+    bot.edit_message_text(f"Вы выбрали {parallel} параллель, выберите класс:", call.message.chat.id, call.message.message_id, 
+        reply_markup=generate_parallel_keyboard(parallel, [letter for letter in cfg.classes[parallel]]))
+    bot.answer_callback_query(call.id, f"{parallel} параллель была выбрана успешно.")
+
+
+@bot.callback_query_handler(func=None, grade_page_config=grade_page_factory.filter())
+def send_grade_page(call: types.CallbackQuery):
+    callback_data: dict[str, str] = grade_page_factory.parse(callback_data=call.data)
+    parallel, letter = callback_data['parallel'], callback_data['letter']    
+    bot.edit_message_text(f"Вы выбрали {parallel}{letter} класс, выберите день недели:", call.message.chat.id, call.message.message_id, parse_mode='Markdown', 
+        reply_markup=generate_grade_keyboard(parallel=parallel, letter=letter))
+    bot.answer_callback_query(call.id, f"{parallel}{letter} класс был выбран успешно.")
+
+
+@bot.callback_query_handler(func=None, schedule_page_config=schedule_page_factory.filter())
+def send_schedule_page(call: types.CallbackQuery):
+    callback_data: dict[str, str] = schedule_page_factory.parse(callback_data=call.data)
+    parallel, letter, weekday = callback_data['parallel'], callback_data['letter'], callback_data['weekday']
+    print(f'{parallel}{letter} Grade for {weekday} schedule was requested by {call.from_user.first_name}')
+    sheet = sp.get_grade_schedule(parallel+letter, weekday)
+    text = f"""`{sheet}`"""
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id, parse_mode='Markdown',
+        reply_markup=generate_schedule_keyboard(parallel=parallel, letter=letter))
     bot.answer_callback_query(call.id)
-    if call.message.reply_to_message.from_user.id != call.from_user.id and call.from_user.id != admin_id:
-        return
-    if call.data == 'abort':
-            bot.delete_message(call.message.chat.id, call.message.message_id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.reply_to_message.message_id)
-            except telebot.apihelper.ApiTelegramException:
-                pass
-            return
-    call_type, call_data = call.data.split(' ', 1) #0 - page after issuing a command, 1 - first page, 2 - second page, 3 - third page of schedule
 
-    if call_type == '0':
-        markup = types.InlineKeyboardMarkup(row_width=3)
-        parallels = [types.InlineKeyboardButton(grade, callback_data="1 " + grade) for grade in cfg.classes]
-        markup.add(*parallels)
-        markup.add(types.InlineKeyboardButton("🗑", callback_data='abort'))
-        bot.edit_message_text("Пожалуйста, выберите параллель:", call.message.chat.id, call.message.message_id, reply_markup=markup)
-        return
-
-    if call_type == '1':
-        markup = types.InlineKeyboardMarkup(row_width=3)
-        parallel = call_data
-        grades = [types.InlineKeyboardButton(parallel+letter, callback_data='2 ' + f"{parallel} {letter}") for letter in cfg.classes[parallel]]
-        markup.add(*grades)
-        navigation_buttons = []
-        navigation_buttons.append(types.InlineKeyboardButton("⬅️", callback_data='0 ' + 'None'))
-        navigation_buttons.append(types.InlineKeyboardButton("🗑", callback_data='abort'))
-        markup.add(*navigation_buttons)
-        bot.edit_message_text(f"Вы выбрали {parallel} параллель, выберите класс:",
-            call.message.chat.id, call.message.message_id, reply_markup=markup)
-        return
-
-    if call_type == '2':
-        weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
-        parallel, letter = call_data.split()
-        markup = types.InlineKeyboardMarkup(row_width=3)
-        markup.add(types.InlineKeyboardButton("Выбрать автоматически", callback_data='3 ' + f"{parallel} {letter} auto"))
-        markup.add(*[types.InlineKeyboardButton(weekday, callback_data='3 ' + f"{parallel} {letter} {weekday}") for weekday in weekdays])
-        navigation_buttons = []
-        navigation_buttons.append(types.InlineKeyboardButton("⬅️", callback_data='1 ' + parallel))
-        navigation_buttons.append(types.InlineKeyboardButton("🗑", callback_data='abort'))
-        markup.add(*navigation_buttons)
-        bot.edit_message_text(f"Вы выбрали {parallel}{letter} класс, выберите день недели:", call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
-        return
-
-    if call_type == '3':
-        print(f"{call_data = } by {call.from_user.first_name}")
-        parallel, letter, weekday = call_data.split()
-        sheet = sp.get_grade_schedule(parallel+letter, weekday)
-        msgtext = f"""`{sheet}`"""
-        markup = types.InlineKeyboardMarkup(row_width=3)
-        navigation_buttons = []
-        navigation_buttons.append(types.InlineKeyboardButton("⬅️", callback_data='2 ' +  f"{parallel} {letter}"))
-        navigation_buttons.append(types.InlineKeyboardButton("🗑", callback_data='abort'))
-        markup.add(*navigation_buttons)
-        bot.edit_message_text(msgtext, call.message.chat.id, call.message.message_id, parse_mode='Markdown', reply_markup=markup)
-        return
 
 if __name__ == '__main__':
     print("Starting application...")
+    bind_filters(bot)
     bot.infinity_polling(skip_pending=True, interval=0)
