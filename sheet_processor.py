@@ -18,7 +18,7 @@ class SpreadsheetProcessor():
             grades[parallel] = grades[parallel] + letter if parallel in grades else letter
         return grades
 
-    def process_sheet(self):
+    def unmerge_and_fill_sheet(self):
         wb = load_workbook(filename=self.book_name, read_only=False)
         ws = wb.active
         mcr_coord_list = [mcr.coord for mcr in ws.merged_cells.ranges]
@@ -32,8 +32,7 @@ class SpreadsheetProcessor():
                 for cell in row:
                     cell.value = top_left_cell_value
         wb.save(self.book_name)
-
+    
 if __name__ == '__main__':
     sp = SpreadsheetProcessor('schedule.xlsx')
-    cfg = Config()
-    cfg.set_grades(sp.get_grade_letters())
+    sp.unmerge_and_fill_sheet()
