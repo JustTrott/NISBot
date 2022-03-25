@@ -5,9 +5,7 @@ class Config():
     def __init__(self, file_name='config.ini'):
         self.cp = cp.ConfigParser()
         self.file_name = file_name
-        self.get_config(file_name)
-
-    def get_config(self, file_name):
+        self.config(file_name)
         if os.path.isfile(file_name):
             self.cp.read(file_name)
         else:
@@ -21,24 +19,22 @@ class Config():
                 self.cp.write(file)
 
     @property
-    def bot_token(self):
+    def bot_token(self) -> str:
         return self.cp['connection']['bot_token']
 
     @property
-    def classes(self):
-        class_dict = {}
-        for i in range(7, 13):
-            class_dict[str(i)] = [char for char in self.cp['classes'][str(i)]]
-        return class_dict
+    def classes(self) -> dict[str, str]:
+        _classes = self.cp['classes']
+        return _classes
 
     @classes.setter
-    def classes(self, value : dict):
+    def classes(self, value : dict[str, str]):
         self.cp['classes'] = value
         with open(self.file_name, 'w') as file:
             self.cp.write(file)
 
     @property
-    def admin_id(self):
+    def admin_id(self) -> int:
         return int(self.cp['admin']['admin_id'])
 
 

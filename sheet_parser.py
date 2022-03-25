@@ -3,10 +3,10 @@ from datetime import datetime
 from tabulate import tabulate
 
 class SpreadsheetParser():
-    def __init__(self, filename):
+    def __init__(self, filename : str):
         self.book_name = filename
 
-    def get_grade_schedule(self, grade, weekday):
+    def get_grade_schedule(self, grade : str, weekday : str) -> str:
         if weekday == 'auto':
             weekday = self.get_current_weekday()
         self.wb = load_workbook(filename=self.book_name, read_only=True)
@@ -70,7 +70,7 @@ class SpreadsheetParser():
         schedule += '\n' + '\n\n'.join([f'Профили{index+1}: {subject}' for index, subject in enumerate(profile_subjects)])
         return schedule
 
-    def get_current_weekday(self):
+    def get_current_weekday(self) -> str:
         weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
         if datetime.utcnow().hour >= 10:
             day = datetime.utcnow().weekday() + 1

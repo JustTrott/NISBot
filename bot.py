@@ -13,7 +13,7 @@ bot = telebot.TeleBot(cfg.bot_token)
 admin_id = cfg.admin_id
 
 @bot.message_handler(commands=['m'])
-def send_msg(message):
+def send_msg(message : types.Message):
     if message.from_user.id != admin_id:
         return
     chat_id = -1001252807888
@@ -22,7 +22,7 @@ def send_msg(message):
 
 
 @bot.message_handler(commands=['schedule'])
-def send_schedule(message):
+def send_schedule(message : types.Message):
     spy_string = f"/schedule command was used by {message.from_user.first_name}"
     spy_string += f" {message.from_user.last_name}" if message.from_user.last_name is not None else ""
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
@@ -35,7 +35,7 @@ def send_schedule(message):
     bot.send_message(message.chat.id, "Пожалуйста, выберите параллель:", reply_markup=markup, reply_to_message_id=message.message_id)
 
 @bot.callback_query_handler(func=lambda call: True)
-def handle(call):
+def handle(call : types.CallbackQuery):
     bot.answer_callback_query(call.id)
     if call.message.reply_to_message.from_user.id != call.from_user.id and call.from_user.id != admin_id:
         return

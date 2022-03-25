@@ -3,10 +3,10 @@ from openpyxl.utils.cell import range_boundaries
 from config import Config
 
 class SpreadsheetProcessor():
-    def __init__(self, filename):
+    def __init__(self, filename : str):
         self.book_name = filename
 
-    def get_grade_letters(self):
+    def get_grade_letters(self) -> dict[str, str]:
         wb = load_workbook(filename=self.book_name, read_only=True)        
         ws = wb.active
         grades = {}
