@@ -4,6 +4,7 @@ import configparser as cp
 class Config():
     def __init__(self, file_name='config.ini'):
         self.cp = cp.ConfigParser()
+        self.file_name = file_name
         self.get_config(file_name)
 
     def get_config(self, file_name):
@@ -18,6 +19,11 @@ class Config():
                 self.cp['classes'][str(i)] = ''
             with open(file_name, 'w') as file:
                 self.cp.write(file)
+
+    def set_grades(self, grades : dict):
+        self.cp['classes'] = grades
+        with open(self.file_name, 'w') as file:
+            self.cp.write(file)
 
     @property
     def bot_token(self):

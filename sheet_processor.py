@@ -1,9 +1,22 @@
 from openpyxl import load_workbook
 from openpyxl.utils.cell import range_boundaries
+from config import Config
 
 class SpreadsheetProcessor():
     def __init__(self, filename):
         self.book_name = filename
+
+    def get_grade_letters(self):
+        wb = load_workbook(filename=self.book_name, read_only=True)        
+        ws = wb.active
+        grades = {}
+        for row in ws['A6':'A182']:
+            if row[0].value is None:
+                continue
+            parallel = row[0].value[:-4]
+            letter = row[0].value[len(parallel):-3]
+            grades[parallel] = grades[parallel] + letter if parallel in grades else letter
+        return grades
 
     def process_sheet(self):
         wb = load_workbook(filename=self.book_name, read_only=False)
@@ -22,4 +35,5 @@ class SpreadsheetProcessor():
 
 if __name__ == '__main__':
     sp = SpreadsheetProcessor('schedule.xlsx')
-    sp.process_sheet()
+    cfg = Config()
+    cfg.set_grades(sp.get_grade_letters())
