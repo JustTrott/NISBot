@@ -3,13 +3,11 @@ import telebot
 from telebot import types
 from config import Config
 from sheet_parser import SpreadsheetParser
-from time import sleep
 
 cfg = Config()
 if cfg.bot_token == '':
     print("Bot token is not found in config.ini")
     sys.exit()
-weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
 sp = SpreadsheetParser('schedule.xlsx')
 bot = telebot.TeleBot(cfg.bot_token)
 admin_id = cfg.admin_id
@@ -72,6 +70,7 @@ def handle(call):
         return
 
     if call_type == '2':
+        weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
         parallel, letter = call_data.split()
         markup = types.InlineKeyboardMarkup(row_width=3)
         markup.add(types.InlineKeyboardButton("Выбрать автоматически", callback_data='3 ' + f"{parallel} {letter} auto"))
