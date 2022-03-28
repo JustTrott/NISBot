@@ -52,10 +52,7 @@ def generate_grade_keyboard(parallel: str, letter: str) -> None:
     keyboard.add(
         InlineKeyboardButton(
             text='Выбрать автоматически',
-            parallel=parallel,
-            letter=letter,
-            weekday='auto'
-        )
+            callback_data=schedule_page_factory.new(parallel=parallel, letter=letter, weekday='auto'))
     )
     keyboard.add(*[
         InlineKeyboardButton(
