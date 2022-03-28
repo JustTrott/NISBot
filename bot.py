@@ -32,6 +32,7 @@ def send_welcome(message: types.Message):
     welcome_message += "\nПросто напишите /schedule и следуйте инструкциям! <- Команда также работает и в **группах**"
     welcome_message += "\nТакже можно вызвать бота не добавляя его, в любом чате, написав @TrottTheBot"
     welcome_message += "\nСпасибо, что пользуетесь ботом. Автор: @TrottTheDev"
+    bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
 
 
 @bot.message_handler(commands=['schedule'])
