@@ -74,10 +74,7 @@ def send_parallel_page(call: types.CallbackQuery):
 @bot.callback_query_handler(func=None, grade_page_config=grade_page_factory.filter())
 def send_grade_page(call: types.CallbackQuery):
     callback_data: dict[str, str] = grade_page_factory.parse(callback_data=call.data)
-    print(callback_data)
-    parallel, letter = callback_data['parallel'], callback_data['letter']
-    print(generate_grade_keyboard(parallel=parallel, letter=letter))
-        
+    parallel, letter = callback_data['parallel'], callback_data['letter'] 
     bot.edit_message_text(f"Вы выбрали {parallel}{letter} класс, выберите день недели:", call.message.chat.id, call.message.message_id, parse_mode='Markdown', 
         reply_markup=generate_grade_keyboard(parallel=parallel, letter=letter))
     bot.answer_callback_query(call.id, f"{parallel}{letter} класс был выбран успешно.")
