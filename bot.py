@@ -28,8 +28,8 @@ def send_msg(message : types.Message):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message: types.Message):
-    welcome_message = "Этот бот позволяет вам **быстро** получить школьное расписание НИШ ФМН в городе Нур-Султан, включая информацию о **кабинетах** и **времени** проведения уроков."
-    welcome_message += "\nПросто напишите /schedule и следуйте инструкциям! <- Команда также работает и в **группах**"
+    welcome_message = "Этот бот позволяет вам *быстро* получить школьное расписание НИШ ФМН в городе Нур-Султан, включая информацию о **кабинетах** и **времени** проведения уроков."
+    welcome_message += "\nПросто напишите /schedule и следуйте инструкциям! <- Команда также работает и в *группах*"
     welcome_message += "\nТакже можно вызвать бота не добавляя его, в любом чате, написав @TrottTheBot"
     welcome_message += "\nСпасибо, что пользуетесь ботом. Автор: @TrottTheDev"
     bot.send_message(message.chat.id, welcome_message, parse_mode="Markdown")
