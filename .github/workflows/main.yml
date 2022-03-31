@@ -7,7 +7,7 @@ on:
   # Triggers the workflow on push or pull request events but only when the schedule.xlsx file is pushed
   push:
     paths:
-      - 'schedule.xlsx'
+      - '**.xlsx'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -33,6 +33,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
+      - name: delete schedule.xlsx
+        run: rm -f file.txt
+        
+      - name: rename *.xlsx to schedule.xlsx
+        run: for f in *.xlsx; do mv "${f}" "schedule.xlsx"; done;
+        
       - name: execute py script # run sheet_processor.py to get process the spreadsheet
         run: python sheet_processor.py
           
