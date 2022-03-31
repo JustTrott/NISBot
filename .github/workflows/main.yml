@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: delete schedule.xlsx
-        run: rm -f file.txt
+        run: rm -f schedule.xlsx
         
       - name: rename *.xlsx to schedule.xlsx
         run: for f in *.xlsx; do mv "${f}" "schedule.xlsx"; done;
