@@ -15,7 +15,7 @@ if cfg.bot_token == '':
     sys.exit()
 sp = SpreadsheetParser('schedule.xlsx')
 bot = telebot.TeleBot(cfg.bot_token)
-def_msg = "Бот так ошалел от нового расписания, что не выдержал и уше́л на технивеские работы. Приносим наши извинения."
+def_msg = "Бот так ошалел от нового расписания, что не выдержал и уше́л на технические работы. Приносим наши извинения."
 
 
 @bot.message_handler(commands=['m'])
