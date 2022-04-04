@@ -15,6 +15,7 @@ if cfg.bot_token == '':
     sys.exit()
 sp = SpreadsheetParser('schedule.xlsx')
 bot = telebot.TeleBot(cfg.bot_token)
+def_msg = "Бот так ошалел от нового расписания, что не выдержал и уше́л на технивеские работы. Приносим наши извинения."
 
 
 @bot.message_handler(commands=['m'])
@@ -37,6 +38,8 @@ def send_welcome(message: types.Message):
 
 @bot.message_handler(commands=['schedule'])
 def send_schedule(message : types.Message):
+    bot.send_message(message.chat.id, def_msg)
+    return
     spy_string = f"/schedule command was used by {message.from_user.first_name}"
     spy_string += f" {message.from_user.last_name}" if message.from_user.last_name is not None else ""
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
@@ -47,6 +50,7 @@ def send_schedule(message : types.Message):
 
 @bot.callback_query_handler(func=None, abort_config=abort_factory.filter())
 def abort(call : types.CallbackQuery):
+    return
     bot.answer_callback_query(call.id, "Запрос был удалён.")
     bot.delete_message(call.message.chat.id, call.message.id)
     try:
@@ -57,6 +61,7 @@ def abort(call : types.CallbackQuery):
 
 @bot.callback_query_handler(func=None, home_page_config=home_page_factory.filter())
 def send_home_page(call: types.CallbackQuery):
+    return
     bot.edit_message_text("Пожалуйста, выберите параллель:", call.message.chat.id, call.message.message_id, 
         reply_markup=generate_home_keyboard(list(cfg.classes.keys())))
     bot.answer_callback_query(call.id, "Вы были возвращены на страницу выбора параллелей.")
@@ -64,6 +69,7 @@ def send_home_page(call: types.CallbackQuery):
 
 @bot.callback_query_handler(func=None, parallel_page_config=parallel_page_factory.filter())
 def send_parallel_page(call: types.CallbackQuery):
+    return
     callback_data: dict[str, str] = parallel_page_factory.parse(callback_data=call.data)
     parallel = callback_data['parallel']
     bot.edit_message_text(f"Вы выбрали {parallel} параллель, выберите класс:", call.message.chat.id, call.message.message_id, 
@@ -73,8 +79,9 @@ def send_parallel_page(call: types.CallbackQuery):
 
 @bot.callback_query_handler(func=None, grade_page_config=grade_page_factory.filter())
 def send_grade_page(call: types.CallbackQuery):
+    return
     callback_data: dict[str, str] = grade_page_factory.parse(callback_data=call.data)
-    parallel, letter = callback_data['parallel'], callback_data['letter'] 
+    parallel, letter = callback_data['parallel'], callback_data['letter']    
     bot.edit_message_text(f"Вы выбрали {parallel}{letter} класс, выберите день недели:", call.message.chat.id, call.message.message_id, parse_mode='Markdown', 
         reply_markup=generate_grade_keyboard(parallel=parallel, letter=letter))
     bot.answer_callback_query(call.id, f"{parallel}{letter} класс был выбран успешно.")
@@ -82,6 +89,7 @@ def send_grade_page(call: types.CallbackQuery):
 
 @bot.callback_query_handler(func=None, schedule_page_config=schedule_page_factory.filter())
 def send_schedule_page(call: types.CallbackQuery):
+    return
     callback_data: dict[str, str] = schedule_page_factory.parse(callback_data=call.data)
     parallel, letter, weekday = callback_data['parallel'], callback_data['letter'], callback_data['weekday']
     print(f'{parallel}{letter} Grade for {weekday} schedule was requested by {call.from_user.first_name}')
@@ -93,6 +101,7 @@ def send_schedule_page(call: types.CallbackQuery):
 
 
 def is_query_a_grade(query: str) -> bool:
+    return False
     query = query.strip()
     if query == '':
         return False
