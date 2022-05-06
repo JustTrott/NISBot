@@ -52,12 +52,11 @@ class SpreadsheetProcessor():
             9 : ("15:25", "16:05"),
             10 : ("16:20", "17:00")
         }
-        ws.insert_rows(lessons_row)
         cell : Cell
         for cell in ws[lessons_row + 1]:
             if cell.value in lesson_time:
                 ws[cell.coordinate].offset(-1).value = f"{lesson_time[cell.value][0]}-{lesson_time[cell.value][1]}"
-    
+
 if __name__ == '__main__':
     sp = SpreadsheetProcessor('schedule.xlsx')
     sp.unmerge_and_fill_sheet()
