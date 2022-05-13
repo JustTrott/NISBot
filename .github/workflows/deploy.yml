@@ -6,6 +6,40 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+
+    - name: setup python
+        uses: actions/setup-python@v2
+        #with:
+        #  python-version: '3.7.7' # install the python version needed
+          
+    - name: install python packages
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: replace schedule.xlsx with new one
+      run: |
+        CNT=$(find -maxdepth 1 -name "*.xlsx" -printf "." | wc -c)
+
+        if [ $CNT -gt 1 ]
+        then
+          rm -f schedule.xlsx
+          for f in *.xlsx; do mv "${f}" "schedule.xlsx"; done;
+          python sheet_processor.py
+          git config --local user.email "greenvisp@gmail.com"
+          git config --local user.name "JustTrott"
+          git config --local user.password ${{ secrets.PASSWORD }}
+          git add -A
+          git commit -m "update data" -a
+        fi
+
+    - name: push changes
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.ACCESS_TOKEN_GITHUB }}
+        branch: main  
+
     - name: pull and restart server
       uses: appleboy/ssh-action@master
       with:
