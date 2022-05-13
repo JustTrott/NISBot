@@ -9,9 +9,9 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: setup python
-        uses: actions/setup-python@v2
-        #with:
-        #  python-version: '3.7.7' # install the python version needed
+      uses: actions/setup-python@v2
+      #with:
+      #  python-version: '3.7.7' # install the python version needed
           
     - name: install python packages
       run: |
