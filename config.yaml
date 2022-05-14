@@ -1,0 +1,10 @@
+classes:
+    - 7: [A, B, C, D, E, F, G, H, I]
+    - 8: [A, B, C, D, E, F, G]
+    - 9: [A, B, C, D, E, F, G, H, I]
+    - 10: [A, B, C, D, E]
+    - 11: [A, B, C, D, E, F]
+    - 12: [A, B, E, C, D, F]
+
+misc:
+    admin_id: 526419716

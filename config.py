@@ -1,43 +1,32 @@
 import os
 
-import configparser as cp
+import yaml
+from yaml import Loader, Dumper
 
 class Config():
-    def __init__(self, file_name='config.ini') -> None:
-        self.cp = cp.ConfigParser()
-        self.file_name = file_name
-        if os.path.isfile(file_name):
-            self.cp.read(file_name)
-        else:
-            print("No config file has been found. Creating a blank one")
-            self.cp['connection'] = {}
-            self.cp['connection']['bot_token'] = ''
-            self.cp['classes'] = {}
-            for i in range(7, 13):
-                self.cp['classes'][str(i)] = ''
-            with open(file_name, 'w') as file:
-                self.cp.write(file)
-
+    def __init__(self, filename='config.yaml') -> None:
+        self.filename = filename
+        with open(filename, 'r') as config_file:
+            self.config = yaml.load(config_file, Loader=Loader)
+    
     @property
     def bot_token(self) -> str:
-        return self.cp['connection']['bot_token']
+        return os.getenv('BOT_TOKEN')
 
     @property
-    def classes(self) -> dict[str, str]:
-        _classes = self.cp['classes']
-        return _classes
+    def classes(self) -> 'dict[str, str]':
+        return self.config['classes']
 
     @classes.setter
-    def classes(self, value : dict[str, str]) -> None:
-        self.cp['classes'] = value
-        with open(self.file_name, 'w') as file:
-            self.cp.write(file)
+    def classes(self, value : 'dict[str, str]') -> None:
+        self.config['classes'] = value
+        with open(self.filename, 'w') as config_file:
+            yaml.dump(self.config, config_file, Dumper=Dumper)
 
     @property
     def admin_id(self) -> int:
-        return int(self.cp['admin']['admin_id'])
-
-
+        return int(self.config['misc']['admin_id'])
+            
 if __name__ == '__main__':
     config = Config()
-    print(config.grade_list)
+    print(config.admin_id)
