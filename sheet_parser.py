@@ -7,7 +7,7 @@ class SpreadsheetParser:
     def __init__(self, filename : str):
         self.book_name = filename
 
-    def get_grade_schedule(self, grade : str, weekday : str) -> str:
+    def get_schedule(self, grade : str, weekday : str) -> str:
         if weekday == 'auto':
             weekday = self.get_current_weekday()
         self.wb = load_workbook(filename=self.book_name, read_only=True)
@@ -18,7 +18,7 @@ class SpreadsheetParser:
         schedule += SpreadsheetParser.generate_schedule(ws, row_bounds, col_bounds)
         return schedule
 
-    def get_grade_schedule_bulk(self, grades: list[str], weekday):
+    def get_schedule_bulk(self, grades: 'list[str]', weekday):
         sheets: str = []
         if weekday == 'auto':
             weekday = self.get_current_weekday()
@@ -118,4 +118,4 @@ class SpreadsheetParser:
 
 if __name__ == '__main__':
     sp = SpreadsheetParser('schedule.xlsx')
-    print(sp.get_grade_schedule('11D', 'Понедельник'))
+    print(sp.get_schedule('11D', 'Понедельник'))

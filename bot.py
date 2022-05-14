@@ -9,17 +9,19 @@ from sheet_parser import SpreadsheetParser
 from filters import abort_factory, home_page_factory, parallel_page_factory, grade_page_factory, schedule_page_factory, bind_filters
 from keyboards import generate_home_keyboard, generate_parallel_keyboard, generate_grade_keyboard, generate_schedule_keyboard
 
-cfg = Config()
-if cfg.bot_token == '':
+CONFIG = Config()
+MODE = "SAT" # SAT or NORMAL
+
+if CONFIG.bot_token == '':
     print("Bot token is not found in config.ini")
     sys.exit()
 sp = SpreadsheetParser('schedule.xlsx')
-bot = telebot.TeleBot(cfg.bot_token)
+bot = telebot.TeleBot(CONFIG.bot_token)
 
 
 @bot.message_handler(commands=['m'])
 def send_msg(message : types.Message):
-    if message.from_user.id != cfg.admin_id:
+    if message.from_user.id != CONFIG.admin_id:
         return
     chat_id = -1001252807888
     text = message.text[2:]
@@ -42,7 +44,7 @@ def send_schedule(message : types.Message):
     spy_string += f" with username @{message.from_user.username}" if message.from_user.username is not None else ""
     spy_string += f" in chat {message.chat.title}" if message.chat.title is not None else ""
     print(spy_string)
-    bot.send_message(message.chat.id, "Пожалуйста, выберите параллель:", reply_markup=generate_home_keyboard(list(cfg.classes.keys())), reply_to_message_id=message.message_id)
+    bot.send_message(message.chat.id, "Пожалуйста, выберите параллель:", reply_markup=generate_home_keyboard(list(CONFIG.classes.keys())), reply_to_message_id=message.message_id)
 
 
 @bot.callback_query_handler(func=None, abort_config=abort_factory.filter())
@@ -58,7 +60,7 @@ def abort(call : types.CallbackQuery):
 @bot.callback_query_handler(func=None, home_page_config=home_page_factory.filter())
 def send_home_page(call: types.CallbackQuery):
     bot.edit_message_text("Пожалуйста, выберите параллель:", call.message.chat.id, call.message.message_id, 
-        reply_markup=generate_home_keyboard(list(cfg.classes.keys())))
+        reply_markup=generate_home_keyboard(list(CONFIG.classes.keys())))
     bot.answer_callback_query(call.id, "Вы были возвращены на страницу выбора параллелей.")
 
 
@@ -67,7 +69,7 @@ def send_parallel_page(call: types.CallbackQuery):
     callback_data: dict[str, str] = parallel_page_factory.parse(callback_data=call.data)
     parallel = callback_data['parallel']
     bot.edit_message_text(f"Вы выбрали {parallel} параллель, выберите класс:", call.message.chat.id, call.message.message_id, 
-        reply_markup=generate_parallel_keyboard(parallel, [letter for letter in cfg.classes[parallel]]))
+        reply_markup=generate_parallel_keyboard(parallel, [letter for letter in CONFIG.classes[parallel]]))
     bot.answer_callback_query(call.id, f"{parallel} параллель была выбрана успешно.")
 
 
@@ -85,7 +87,7 @@ def send_schedule_page(call: types.CallbackQuery):
     callback_data: dict[str, str] = schedule_page_factory.parse(callback_data=call.data)
     parallel, letter, weekday = callback_data['parallel'], callback_data['letter'], callback_data['weekday']
     print(f'{parallel}{letter} Grade for {weekday} schedule was requested by {call.from_user.first_name}')
-    sheet = sp.get_grade_schedule(parallel+letter, weekday)
+    sheet = sp.get_schedule(parallel+letter, weekday)
     text = f"""`{sheet}`"""
     bot.edit_message_text(text, call.message.chat.id, call.message.message_id, parse_mode='Markdown',
         reply_markup=generate_schedule_keyboard(parallel=parallel, letter=letter))
@@ -96,7 +98,7 @@ def is_query_a_grade(query: str) -> bool:
     query = query.strip()
     if query == '':
         return False
-    grades = cfg.classes
+    grades = CONFIG.classes
     for parallel in grades:
         for letter in grades[parallel]:
             if query.upper() in str(parallel + letter) or str(parallel + letter) in query.upper():
@@ -106,7 +108,7 @@ def is_query_a_grade(query: str) -> bool:
 
 @bot.inline_handler(lambda query: is_query_a_grade(query.query))
 def show_grades(inline_query: types.InlineQuery):
-    grades = cfg.classes
+    grades = CONFIG.classes
     possible_grades = []
     for parallel in grades:
         for letter in grades[parallel]:
