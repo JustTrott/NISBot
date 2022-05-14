@@ -69,7 +69,7 @@ def send_parallel_page(call: types.CallbackQuery):
     callback_data: dict[str, str] = parallel_page_factory.parse(callback_data=call.data)
     parallel = callback_data['parallel']
     bot.edit_message_text(f"Вы выбрали {parallel} параллель, выберите класс:", call.message.chat.id, call.message.message_id, 
-        reply_markup=generate_parallel_keyboard(parallel, [letter for letter in CONFIG.classes[parallel]]))
+        reply_markup=generate_parallel_keyboard(parallel, CONFIG.classes[int(parallel)]))
     bot.answer_callback_query(call.id, f"{parallel} параллель была выбрана успешно.")
 
 
